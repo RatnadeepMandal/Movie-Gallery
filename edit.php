@@ -170,8 +170,8 @@ $array = mysqli_fetch_array($result);
                     <p id="length" class="invalid">Minimum <b>8 characters</b></p>
                 </div>
                 <div class="form-group custom-file">
-                    <input type="file" class="custom-file-input" name="file" id="file" value ="" >
-                    <input type="hidden" name="file_old" value ="<?php echo $array[8] ?>"  required>
+                    <input type="file" class="custom-file-input" name="file" id="file">
+                    <input type="hidden" name="file_old" value ="<?php echo $array[8] ?>">
                 </div>
                 <div class="form-group">
                     <button type="sumbit" name = "submit" id="submit" class="btn btn-info btn-lg btn-block">Update</button>
@@ -330,27 +330,31 @@ $('#password, #cpassword').on('keyup', function () {
     $file_old= $_POST['file_old'];
     $file_name = $_FILES['file']['name'];
     if ($file_name != '') {
-        $file_update = $_FILES['file']['name'];
+        if(file_exists("Upload/".$file_name)){
+                echo "<script>alert('Image already exists')</script>";
+            }
+            else{
+                $file_update = $file_name;
+                $file_type = $_FILES['file']['type'];
+                $file_size = $_FILES['file']['size'];
+                $file_tem_loc = $_FILES['file']['tmp_name'];
+                $file_store = "Upload/".$file_update;
+                $move = move_uploaded_file($file_tem_loc, $file_store);
+                // echo $file_update;
+                // exit;
+            }
     }
     else {
         $file_update = $file_old;
     }
-    if ($file_name != '') {
-       if(file_exists("Upload/".$_FILES['file']['name'])){
-                echo "<script>alert('Image already exists')</script>";
-            } 
-    }
-    else{
-        $file_type = $_FILES['file']['type'];
-        $file_size = $_FILES['file']['size'];
-        $file_tem_loc = $_FILES['file']['tmp_name'];
-        $file_store = "Upload/".$file_name;
-        move_uploaded_file($file_tem_loc, $file_store);
-        $query= "UPDATE sign_up SET name='$name', date='$date', gender = '$gender', email='$email', phone_no= '$phone_no',password='$password', cpassword='$cpassword',file='$file_update' where id= '$id'";
+    $query= "UPDATE sign_up SET name='$name', date='$date', gender = '$gender', email='$email', phone_no= '$phone_no',password='$password', cpassword='$cpassword',file='$file_update' where id= '$id'";
     // echo $query;
     // exit;
     $data = mysqli_query($conn, $query);
      if($data){
+        if ($move) {
+            unlink("Upload/".$file_old);
+        }
       echo "<script> alert('Record Updated')</script>";
       ?>
     <meta http-equiv='refresh' content ='0; url=http://localhost/test/project/sign_in.php'/>
@@ -358,7 +362,6 @@ $('#password, #cpassword').on('keyup', function () {
      }
      else{
       echo "<script> alert('Failed to update record')</script>";
-    }
     }
 }
 ?>
